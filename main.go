@@ -51,7 +51,7 @@ func (f sampleFetcher) Fetch(url string) (string, []string, error) {
 	// do this now so it won't be forgotten
 	defer resp.Body.Close()
 	
-	links := utils.GetLinksFromHTML(resp.Body)
+	links := utils.GetLinksFromHTML(url, resp.Body)
 
 	for _, link := range links {
 		fmt.Println(link)

@@ -2,11 +2,11 @@ package utils
 
 import (
 	"io"
-
+	 s "strings"
 	"golang.org/x/net/html"
 )
 
-func GetLinksFromHTML(body io.Reader) ([]string) {
+func GetLinksFromHTML(url string, body io.Reader) ([]string) {
 	var links []string
 	z := html.NewTokenizer(body)
 
@@ -21,7 +21,9 @@ func GetLinksFromHTML(body io.Reader) ([]string) {
 			if token.Data == "a" {
 				for _, attr := range token.Attr {
 					if attr.Key == "href" {
-						links = append(links, attr.Val)
+						formattedLink := formatLink(url, attr.Val)
+						links = append(links, formattedLink)
+						
 					}
 				}
 			}
@@ -31,3 +33,15 @@ func GetLinksFromHTML(body io.Reader) ([]string) {
 	return links
 }
 
+
+func formatLink(baseUrl string, link string) (string) {
+	if s.HasPrefix(link, "https://") || s.HasPrefix(link, "http://") {
+		return link
+	} else if s.HasPrefix(link, "./") {
+		return baseUrl + link[1:]
+	} else if s.HasPrefix(link, "/") {
+		return baseUrl + link
+	} else {
+		return baseUrl + "/" + link
+	}
+}
