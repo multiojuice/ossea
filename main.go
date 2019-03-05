@@ -1,9 +1,11 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
-	"fmt" 
+	"fmt"
+
+	"golang.org/x/net/html"
 )
 
 
@@ -35,11 +37,37 @@ func Crawl(url string, depth int, fetcher Fetcher) {
 	return
 }
 
+func GetLinksFromHTML(body io.Reader) ([]string) {
+	var links []string
+	z := html.NewTokenizer(body)
+
+	for {
+		tt := z.Next()
+
+		switch tt {
+		case html.ErrorToken:
+			return links
+		case html.StartTagToken, html.EndTagToken:
+			token := z.Token()
+			if token.Data == "a" {
+				for _, attr := range token.Attr {
+					if attr.Key == "href" {
+						links = append(links, attr.Val)
+					}
+				}
+			}
+		}
+	}
+
+	return links
+}
+
 type sampleFetcher map[string]int
 
 func (f sampleFetcher) Fetch(url string) (string, []string, error) {
 	fmt.Printf("HTML code of %s ...\n", url)
 	resp, err := http.Get(url)
+  	
 	// handle the error if there is one
 	if err != nil {
 		return "", nil, fmt.Errorf("Error fetching")
@@ -47,21 +75,20 @@ func (f sampleFetcher) Fetch(url string) (string, []string, error) {
 
 	// do this now so it won't be forgotten
 	defer resp.Body.Close()
-	// reads html as a slice of bytes
-	html, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", nil, fmt.Errorf("Error reading")
+	
+	links := GetLinksFromHTML(resp.Body)
+
+	for _, link := range links {
+		fmt.Println(link)
 	}
-	// show the HTML code as a string %s
-	fmt.Printf("%s\n", html)
-	return string(html[:len(html)]), nil, nil
+	return "", nil, nil
 }
 
 
 var fetcher = sampleFetcher{}
 
 func main() {
-	Crawl("https://golang.org/", 4, fetcher)
+	Crawl("https://csh.rit.edu", 4, fetcher)
 }
 
 
