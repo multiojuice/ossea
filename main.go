@@ -1,11 +1,9 @@
 package main
 
 import (
-	"io"
 	"net/http"
 	"fmt"
-
-	"golang.org/x/net/html"
+	"./utils"
 )
 
 
@@ -25,6 +23,7 @@ func Crawl(url string, depth int, fetcher Fetcher) {
 	if depth <= 0 {
 		return
 	}
+
 	body, urls, err := fetcher.Fetch(url)
 	if err != nil {
 		fmt.Println(err)
@@ -37,30 +36,6 @@ func Crawl(url string, depth int, fetcher Fetcher) {
 	return
 }
 
-func GetLinksFromHTML(body io.Reader) ([]string) {
-	var links []string
-	z := html.NewTokenizer(body)
-
-	for {
-		tt := z.Next()
-
-		switch tt {
-		case html.ErrorToken:
-			return links
-		case html.StartTagToken, html.EndTagToken:
-			token := z.Token()
-			if token.Data == "a" {
-				for _, attr := range token.Attr {
-					if attr.Key == "href" {
-						links = append(links, attr.Val)
-					}
-				}
-			}
-		}
-	}
-
-	return links
-}
 
 type sampleFetcher map[string]int
 
@@ -76,7 +51,7 @@ func (f sampleFetcher) Fetch(url string) (string, []string, error) {
 	// do this now so it won't be forgotten
 	defer resp.Body.Close()
 	
-	links := GetLinksFromHTML(resp.Body)
+	links := utils.GetLinksFromHTML(resp.Body)
 
 	for _, link := range links {
 		fmt.Println(link)
