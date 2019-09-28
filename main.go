@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 	"fmt"
-	"./utils"
+	"github.com/open-sea/coordinator/utils"
 )
 
 
