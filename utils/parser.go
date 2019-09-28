@@ -1,9 +1,11 @@
 package utils
 
 import (
+	"fmt"
 	"io"
+	"regexp"
 	 s "strings"
-	"golang.org/x/net/html"
+	 "golang.org/x/net/html"
 )
 
 func GetLinksFromHTML(url string, body io.Reader) ([]string) {
@@ -30,7 +32,24 @@ func GetLinksFromHTML(url string, body io.Reader) ([]string) {
 		}
 	}
 
-	return links
+	fmt.Println("DOG")
+
+	cleanedLinks := removeUnknownDomains(url, links);
+
+	return cleanedLinks
+}
+
+
+func removeUnknownDomains(url string, links []string) ([]string) {
+	var knownDomain = regexp.MustCompile(`(http:\/\/|www\.|https:\/\/)([[:ascii:]]*\.|)csh.rit.edu(\/[[:ascii:]]*|)`)
+	var cleanLinks []string
+	for _, s := range links {
+		if knownDomain.MatchString(s) {
+			fmt.Printf(s)
+			cleanLinks = append(cleanLinks, s)
+		}
+	}
+	return cleanLinks
 }
 
 

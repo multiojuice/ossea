@@ -36,7 +36,6 @@ func Crawl(url string, depth int, fetcher Fetcher) {
 	return
 }
 
-
 type sampleFetcher map[string]int
 
 func (f sampleFetcher) Fetch(url string) (string, []string, error) {
@@ -54,8 +53,9 @@ func (f sampleFetcher) Fetch(url string) (string, []string, error) {
 	links := utils.GetLinksFromHTML(url, resp.Body)
 
 	for _, link := range links {
-		fmt.Println(link)
+		fmt.Println("NOW:", link)
 	}
+
 	return "", nil, nil
 }
 
