@@ -16,7 +16,6 @@ type Fetcher interface {
 type sampleFetcher map[string]int
 
 func (f sampleFetcher) Fetch(url string) (string, []string, error) {
-	fmt.Printf("HTML code of %s ...\n", url)
 	resp, err := http.Get(url)
 
 	// handle the error if there is one
@@ -44,19 +43,17 @@ var m = make(map[string]int)
 func Crawl(url string, depth int, fetcher Fetcher) {
 	// TODO: Fetch URLs in parallel.
 	// TODO: Don't fetch the same URL twice.
-	println(depth)
 	// This implementation doesn't do either:
 	if depth <= 0 {
 		return
 	}
 
-	body, urls, err := fetcher.Fetch(url)
+	_, urls, err := fetcher.Fetch(url)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	fmt.Printf("found: %s %q\n", url, body)
 	for _, u := range urls {
 		if _, ok := m[u]; !ok {
 			m[u] = 1
@@ -70,10 +67,11 @@ func Crawl(url string, depth int, fetcher Fetcher) {
 var fetcher = sampleFetcher{}
 
 func main() {
-	Crawl("https://csh.rit.edu", 2, fetcher)
+	Crawl("https://csh.rit.edu", 5, fetcher)
 	for key, _ := range m {
 		println(key)
 	}
+	println(len(m))
 }
 
 
